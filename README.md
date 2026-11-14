@@ -7,5 +7,6 @@ Elaborado por:
 
 - Alexis Jair Fuentes Hernández
 - Edgar Arriaga Caracosa
+- Jonas Heliane Hurtado Zepeda
 
 ![Logo del ITSU](screenshots/LOGO-NUEVO-TEC-URUAPAN3-1.png)
