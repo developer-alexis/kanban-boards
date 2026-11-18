@@ -2,19 +2,19 @@
 -- Contraseña de prueba utilizada para los hashes bcrypt de users: password123
 
 INSERT INTO users (id, name, email, password_hash) VALUES
-(1, 'Alexis Jair Fuentes Hernández', 'alexis@kanban.local', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
-(2, 'Edgar Arriaga Caracosa', 'edgar@kanban.local', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'),
-(3, 'Jonas Heliane Hurtado Zepeda', 'jonas@kanban.local', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');
-(4, 'Iris Ivett', 'iivett0@t.co', '$2a$04$FRnwDIVVN6fpA2TL7ZdGU.gW4PKdW8N/ayUjU6eLbXD3Ln4peanBq'),
-(5, 'Maryellen Pedrollo', 'mpedrollo1@prweb.com', '$2a$04$KA8JRbYjwhoAUh2gJ/deL.0WMQQWmYtHF0ol2fxweNFGGKlSAkUZy'),
-(6, 'Reg Eddowes', 'reddowes2@about.me', '$2a$04$rYK6dyDAKjFX.kcWtCJT9ONZaCVDCfJBKT5IFqdI5qOGiFNTc2MO2'),
-(7, 'Olympia Kobieriecki', 'okobieriecki3@pcworld.com', '$2a$04$ZYPVGrNFN9/j/ZpfhlcSzuKkCxiEb7apXnHn2do3RQhJFGhxblBRe'),
-(8, 'Shirl Warrack', 'swarrack4@nih.gov', '$2a$04$Ckrtbwtc1CXdcJnU0YwyYetrifEePyT2jJ9l0/srQJWzLePs6jh5e'),
-(9, 'Huntington Howard', 'hhoward5@nature.com', '$2a$04$5vhTG.RAGJ0lRXYfuns8FeRDp2EMAGaDllpTnu2QpSBOLYYRTFm4.'),
-(10, 'Donaugh Stidson', 'dstidson6@twitter.com', '$2a$04$RvKs6zgcxaLuw.W9iDL7qeZirv5lOWp5JVhZl6drVDKQISmXFoLEu'),
-(11, 'Vikky Hardware', 'vhardware7@github.io', '$2a$04$ifz7RBS3XJAyUF//n/2h/OAtbn4tySaCvqaUbVCF/fWGwu5gzVpea'),
-(12, 'Lyndsey Tremmil', 'ltremmil8@trellian.com', '$2a$04$fxgy8AtfllnXMUmy3Z/RWev3pVBHDnoiJwxLXwQyJEXyfbrk7AGKa'),
-(13, 'Julienne Bindon', 'jbindon9@webnode.com', '$2a$04$K761QkEB1lQbTq5H4mXKZOo6ouumYQnHvuiezsigYjNSlSfyRpkEm');
+(1, 'Alexis Jair Fuentes Hernández', 'alexis@kanban.local', '$2a$04$QwjHucJadhrB1suQT1TjTuq2/7/osdYu7emBQ/qFKo.5icHxPGSde'),
+(2, 'Edgar Arriaga Caracosa', 'edgar@kanban.local', '$2a$04$PdvDNVi80iDKE3mjb8zm/.zwKGlxF82XrZM7m8gBqvPX8FkaRIrye'),
+(3, 'Jonas Heliane Hurtado Zepeda', 'jonas@kanban.local', '$2a$04$b6EU3T2HAxcm/4w.uFln6OhTOxpt26plVuC4d.SXak91swywFWLKK'),
+(4, 'Iris Ivett', 'iivett0@t.co', '$2a$04$k8KqAgVI59VWAXRGScbJ3Oc5EebHw6VRSLo4B0yevi7pVBb04iZqm'),
+(5, 'Maryellen Pedrollo', 'mpedrollo1@prweb.com', '$2a$04$TmQyKyOV.BHMpFCY1ciHqe2UOAI9ty/wEoVRa8fQU.7GRk9aVKJ/K'),
+(6, 'Reg Eddowes', 'reddowes2@about.me', '$2a$04$ivvjyd/KswhPoB47O/joGOSUQeypWlx42qwqfClLVkJPCG6PRhW.C'),
+(7, 'Olympia Kobieriecki', 'okobieriecki3@pcworld.com', '$2a$04$CYSG0u7a0ZRAsK61ZWSDAeeMozNEcBNVqyCNNi.yI7rUl/35OE0zC'),
+(8, 'Shirl Warrack', 'swarrack4@nih.gov', '$2a$04$nECQ773Y1P7WxEpTpIKu5.nZFc9oJkqFtOBlDpNG6hqcVrY5nIvI2'),
+(9, 'Huntington Howard', 'hhoward5@nature.com', '$2a$04$VuDqhQkNWfF9mx3M56limOkfIUnAZZdoP6s6vFibKvzWhSuuwM4RC'),
+(10, 'Donaugh Stidson', 'dstidson6@twitter.com', '$2a$04$1Qx3PiOksxcGsdx7fKoMROMJlDJWVd43XSoLdu3V8oON67QUrEnVW'),
+(11, 'Vikky Hardware', 'vhardware7@github.io', '$2a$04$RHm6j27W3SkQwHBSsEfWNOwNzGXc3pLBKThrBhI39HEGQ5GIM5rOy'),
+(12, 'Lyndsey Tremmil', 'ltremmil8@trellian.com', '$2a$04$35gbAXCjBFtOXsdJCqa1sOTTjj.smyKm6wqC9uwQ3LnnNMfnjGC1K'),
+(13, 'Julienne Bindon', 'jbindon9@webnode.com', '$2a$04$i9/qWwbJBgJjoXoZUtgfdeXh.k6FkVQSzSBmZQ28oFoAL/YQtPKEG');
 
 
 INSERT INTO boards (id, name, description, created_at) VALUES
@@ -24,20 +24,20 @@ INSERT INTO boards (id, name, description, created_at) VALUES
 
 INSERT INTO boards_users (user_id, board_id) VALUES
 (1, 1), (2, 1), (3, 1),
-(1, 2), (3, 2);
+(1, 2), (2, 2), (3, 2);
 
 
 INSERT INTO columns (id, board_id, name, position, wip_limit) VALUES
 
-(1, 1, 'Por hacer',   0, 0),  -- Backlog/Por hacer sin límite estricto (0 = ilimitado)
+(1, 1, 'Por hacer',   0, NULL),  -- Backlog/Por hacer sin límite estricto (NULL = ilimitado)
 (2, 1, 'En progreso', 1, 3),  -- Límite WIP de 3 tarjetas
 (3, 1, 'Review/QA',   2, 2),  -- Límite WIP de 2 tarjetas
-(4, 1, 'Terminado',   3, 0),
+(4, 1, 'Terminado',   3, NULL),
 
 
-(5, 2, 'Por hacer',   0, 0),
+(5, 2, 'Por hacer',   0, NULL),
 (6, 2, 'En progreso', 1, 2),
-(7, 2, 'Terminado',   2, 0);
+(7, 2, 'Terminado',   2, NULL);
 
 
 INSERT INTO labels (id, board_id, name, description, color_hex) VALUES
@@ -79,16 +79,20 @@ INSERT INTO cards_labels (label_id, card_id) VALUES
 
 
 INSERT INTO card_movements (id, card_id, from_column_id, to_column_id, moved_at) VALUES
-
-(1, 6, NULL, 1, '2026-11-02 08:30:00'),
-(2, 6, 1,    2, '2026-11-02 10:00:00'),
-(3, 6, 2,    4, '2026-11-04 16:00:00'),
-
-
-(4, 7, NULL, 1, '2026-11-03 12:00:00'),
-(5, 7, 1,    2, '2026-11-04 09:00:00'),
-(6, 7, 2,    4, '2026-11-05 15:00:00'),
-
-
-(7, 3, NULL, 1, '2026-11-08 09:15:00'),
-(8, 3, 1,    2, '2026-11-09 10:00:00');
+(1,  1, NULL, 1, '2026-11-10 10:00:00'),
+(2,  2, NULL, 1, '2026-11-11 11:20:00'),
+(3,  3, NULL, 1, '2026-11-08 09:15:00'),
+(4,  3, 1,    2, '2026-11-09 10:00:00'),
+(5,  4, NULL, 1, '2026-11-09 14:00:00'),
+(6,  4, 1,    2, '2026-11-09 16:00:00'),
+(7,  5, NULL, 1, '2026-11-06 16:45:00'),
+(8,  5, 1,    3, '2026-11-07 10:00:00'),
+(9,  6, NULL, 1, '2026-11-02 08:30:00'),
+(10, 6, 1,    2, '2026-11-02 10:00:00'),
+(11, 6, 2,    4, '2026-11-04 16:00:00'),
+(12, 7, NULL, 1, '2026-11-03 12:00:00'),
+(13, 7, 1,    2, '2026-11-04 09:00:00'),
+(14, 7, 2,    4, '2026-11-05 15:00:00'),
+(15, 8, NULL, 5, '2026-11-05 11:00:00'),
+(16, 9, NULL, 5, '2026-11-06 15:10:00'),
+(17, 9, 5,    6, '2026-11-07 09:00:00');
