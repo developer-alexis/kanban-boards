@@ -18,6 +18,8 @@ CREATE TABLE columns (
     name VARCHAR(100) NOT NULL,
     position INT UNSIGNED NOT NULL,
     wip_limit INT UNSIGNED,
+    color_hex CHAR(7),
+    CONSTRAINT chk_columns_color_hex CHECK (color_hex IS NULL OR color_hex REGEXP '^#[0-9A-Fa-f]{6}$'),
     CONSTRAINT chk_columns_wip_limit CHECK (wip_limit IS NULL OR wip_limit > 0),
     CONSTRAINT fk_columns_board FOREIGN KEY (board_id) REFERENCES boards(id) ON DELETE CASCADE
 );
@@ -28,8 +30,10 @@ CREATE TABLE cards (
     title VARCHAR(100) NOT NULL,
     description TEXT,
     priority VARCHAR(50),
+    color_hex CHAR(7) NOT NULL DEFAULT '#FEFF9C',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     position INT UNSIGNED NOT NULL,
+    CONSTRAINT chk_cards_color_hex CHECK (color_hex REGEXP '^#[0-9A-Fa-f]{6}$'),
     CONSTRAINT fk_cards_column FOREIGN KEY (column_id) REFERENCES columns(id) ON DELETE CASCADE
 );
 
