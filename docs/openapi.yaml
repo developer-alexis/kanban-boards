@@ -1,0 +1,895 @@
+openapi: 3.1.0
+info:
+  title: Kanban Boards Endpoints
+  version: 0.0.1
+  description: |
+    API for the Kanban dashboard. Conventions:
+    - JSON field names match the database (`wip_limit`, `color_hex`, `created_at`).
+    - Colors use the format `#RRGGBB` and are stored in uppercase.
+    - Errors always have the shape `{ "error": "message" }`.
+    - `wip_limit` is `null` when a column has no limit.
+servers:
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: Auth
+  - name: Boards
+  - name: Columns
+  - name: Cards
+  - name: Labels
+  - name: Metrics
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInput'
+      responses:
+        '201':
+          description: User created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: The email is already registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInput'
+      responses:
+        '200':
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /boards:
+    get:
+      tags: [Boards]
+      summary: Show all the boards the user belongs to
+      description: Retrieves all the boards in which the user is listed as a member. This includes boards created by the user and boards that the user has been added to.
+      responses:
+        '200':
+          description: List of boards.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Board'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Boards]
+      summary: Create a board
+      description: Creates a board, adds the creator as a member, and creates the default labels for the board in the same operation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoardInput'
+      responses:
+        '201':
+          description: Board created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /boards/{boardId}:
+    parameters:
+      - $ref: '#/components/parameters/BoardId'
+    get:
+      tags: [Boards]
+      summary: Get a board with its columns, cards and labels
+      responses:
+        '200':
+          description: The board and everything inside it.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BoardDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Boards]
+      summary: Edit a board
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoardInput'
+      responses:
+        '200':
+          description: Board updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Boards]
+      summary: Delete a board
+      description: Also deletes its columns, cards, labels and movement history.
+      responses:
+        '204':
+          description: Board deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /boards/{boardId}/members:
+    parameters:
+      - $ref: '#/components/parameters/BoardId'
+    post:
+      tags: [Boards]
+      summary: Add a user to the board
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id:
+                  $ref: '#/components/schemas/Id'
+      responses:
+        '204':
+          description: User added (or already a member).
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /boards/{boardId}/members/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/BoardId'
+      - $ref: '#/components/parameters/UserId'
+    delete:
+      tags: [Boards]
+      summary: Remove a user from the board
+      responses:
+        '204':
+          description: User removed.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /boards/{boardId}/columns:
+    parameters:
+      - $ref: '#/components/parameters/BoardId'
+    post:
+      tags: [Columns]
+      summary: Create a column in a board
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ColumnInput'
+      responses:
+        '201':
+          description: Column created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /columns/{columnId}:
+    parameters:
+      - $ref: '#/components/parameters/ColumnId'
+    put:
+      tags: [Columns]
+      summary: Edit a column (name, position, WIP limit, color)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ColumnInput'
+      responses:
+        '200':
+          description: Column updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Columns]
+      summary: Delete a column
+      description: Also deletes the cards in the column and the movement history that mentions it.
+      responses:
+        '204':
+          description: Column deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /columns/{columnId}/cards:
+    parameters:
+      - $ref: '#/components/parameters/ColumnId'
+    post:
+      tags: [Cards]
+      summary: Create a card in a column
+      description: Records the creation as the first movement of the card (`from_column_id` is null). Fails with 409 if the column has reached its WIP limit.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardInput'
+      responses:
+        '201':
+          description: Card created. If `color_hex` was not sent, it is `#FEFF9C`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/WipLimitReached'
+
+  /cards/{cardId}:
+    parameters:
+      - $ref: '#/components/parameters/CardId'
+    put:
+      tags: [Cards]
+      summary: Edit a card
+      description: Edits title, description, priority and color. To change the column, use the move endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardInput'
+      responses:
+        '200':
+          description: Card updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Cards]
+      summary: Delete a card
+      responses:
+        '204':
+          description: Card deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /cards/{cardId}/move:
+    parameters:
+      - $ref: '#/components/parameters/CardId'
+    post:
+      tags: [Cards]
+      summary: Move a card to another column
+      description: |
+        Enforces the WIP rule: if the destination column already holds as many
+        cards as its limit, the card is not moved and the response is 409.
+        A successful move records a row in `card_movements`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [column_id]
+              properties:
+                column_id:
+                  $ref: '#/components/schemas/Id'
+                position:
+                  type: integer
+                  minimum: 0
+                  description: Position inside the destination column. Defaults to the end.
+      responses:
+        '200':
+          description: Card moved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/WipLimitReached'
+
+  /cards/{cardId}/assignees/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/CardId'
+      - $ref: '#/components/parameters/UserId'
+    post:
+      tags: [Cards]
+      summary: Assign a user to a card
+      description: The user must be a member of the card's board.
+      responses:
+        '204':
+          description: User assigned (or already assigned).
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Cards]
+      summary: Unassign a user from a card
+      responses:
+        '204':
+          description: User unassigned.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /boards/{boardId}/labels:
+    parameters:
+      - $ref: '#/components/parameters/BoardId'
+    get:
+      tags: [Labels]
+      summary: List the labels of a board
+      responses:
+        '200':
+          description: Labels of the board.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Label'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Labels]
+      summary: Create a label in a board
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LabelInput'
+      responses:
+        '201':
+          description: Label created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The board already has a label with that name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /labels/{labelId}:
+    parameters:
+      - $ref: '#/components/parameters/LabelId'
+    put:
+      tags: [Labels]
+      summary: Edit a label
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LabelInput'
+      responses:
+        '200':
+          description: Label updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The board already has a label with that name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags: [Labels]
+      summary: Delete a label
+      description: The label is also removed from every card that had it.
+      responses:
+        '204':
+          description: Label deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /cards/{cardId}/labels/{labelId}:
+    parameters:
+      - $ref: '#/components/parameters/CardId'
+      - $ref: '#/components/parameters/LabelId'
+    post:
+      tags: [Labels]
+      summary: Add a label to a card
+      description: The label must belong to the same board as the card.
+      responses:
+        '204':
+          description: Label added (or already on the card).
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Labels]
+      summary: Remove a label from a card
+      responses:
+        '204':
+          description: Label removed.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /boards/{boardId}/metrics:
+    parameters:
+      - $ref: '#/components/parameters/BoardId'
+    get:
+      tags: [Metrics]
+      summary: Dashboard metrics of a board
+      description: |
+        Cards per column, current WIP against the limit, and cycle time.
+        Cycle time is measured from the first time a card entered an
+        "in progress" column until the last time it entered a "done" column.
+        Cards that have not finished have no cycle time.
+      responses:
+        '200':
+          description: Metrics of the board.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    BoardId:
+      name: boardId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
+    ColumnId:
+      name: columnId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
+    CardId:
+      name: cardId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
+    LabelId:
+      name: labelId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
+
+  responses:
+    BadRequest:
+      description: Invalid input.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: name is required
+    Unauthorized:
+      description: Missing or invalid credentials.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: invalid credentials
+    NotFound:
+      description: The resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: not found
+    WipLimitReached:
+      description: The destination column reached its WIP limit.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: column reached its WIP limit
+
+  schemas:
+    Id:
+      type: integer
+      minimum: 1
+      example: 1
+
+    Color:
+      type: string
+      pattern: '^#[0-9A-Fa-f]{6}$'
+      description: Hex color. The server normalizes it to uppercase.
+      example: '#E5484D'
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    RegisterInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          maxLength: 150
+        password:
+          type: string
+          minLength: 8
+          maxLength: 72
+          description: Maximum 72 bytes because of bcrypt.
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      required: [id, name, email]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+
+    BoardInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 120
+        description:
+          type: [string, 'null']
+
+    Board:
+      type: object
+      required: [id, name, created_at]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        name:
+          type: string
+        description:
+          type: [string, 'null']
+        created_at:
+          type: string
+          format: date-time
+
+    BoardDetail:
+      allOf:
+        - $ref: '#/components/schemas/Board'
+        - type: object
+          required: [columns, labels, members]
+          properties:
+            columns:
+              type: array
+              description: Ordered by `position`. Each column includes its cards.
+              items:
+                $ref: '#/components/schemas/ColumnWithCards'
+            labels:
+              type: array
+              items:
+                $ref: '#/components/schemas/Label'
+            members:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+
+    ColumnInput:
+      type: object
+      required: [name, position]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        position:
+          type: integer
+          minimum: 0
+        wip_limit:
+          type: [integer, 'null']
+          minimum: 1
+          description: Maximum number of cards. `null` means no limit.
+        color_hex:
+          oneOf:
+            - $ref: '#/components/schemas/Color'
+            - type: 'null'
+          description: Optional. `null` means no color.
+
+    Column:
+      type: object
+      required: [id, board_id, name, position, wip_limit, color_hex]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        board_id:
+          $ref: '#/components/schemas/Id'
+        name:
+          type: string
+        position:
+          type: integer
+        wip_limit:
+          type: [integer, 'null']
+        color_hex:
+          oneOf:
+            - $ref: '#/components/schemas/Color'
+            - type: 'null'
+
+    ColumnWithCards:
+      allOf:
+        - $ref: '#/components/schemas/Column'
+        - type: object
+          required: [cards]
+          properties:
+            cards:
+              type: array
+              description: Ordered by `position`.
+              items:
+                $ref: '#/components/schemas/Card'
+
+    CardInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: [string, 'null']
+        priority:
+          type: [string, 'null']
+          enum: [alta, media, baja, null]
+        color_hex:
+          $ref: '#/components/schemas/Color'
+          description: Optional. Defaults to `#FEFF9C`.
+
+    Card:
+      type: object
+      required: [id, column_id, title, priority, color_hex, created_at, position, labels, assignees]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        column_id:
+          $ref: '#/components/schemas/Id'
+        title:
+          type: string
+        description:
+          type: [string, 'null']
+        priority:
+          type: [string, 'null']
+          enum: [alta, media, baja, null]
+        color_hex:
+          $ref: '#/components/schemas/Color'
+        created_at:
+          type: string
+          format: date-time
+        position:
+          type: integer
+        labels:
+          type: array
+          description: Ids of the labels on this card.
+          items:
+            $ref: '#/components/schemas/Id'
+        assignees:
+          type: array
+          description: Ids of the users assigned to this card.
+          items:
+            $ref: '#/components/schemas/Id'
+
+    LabelInput:
+      type: object
+      required: [name, color_hex]
+      properties:
+        name:
+          type: string
+          maxLength: 50
+        description:
+          type: [string, 'null']
+        color_hex:
+          $ref: '#/components/schemas/Color'
+
+    Label:
+      type: object
+      required: [id, board_id, name, color_hex]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        board_id:
+          $ref: '#/components/schemas/Id'
+        name:
+          type: string
+        description:
+          type: [string, 'null']
+        color_hex:
+          $ref: '#/components/schemas/Color'
+
+    Metrics:
+      type: object
+      required: [board_id, total_cards, columns, cycle_time]
+      properties:
+        board_id:
+          $ref: '#/components/schemas/Id'
+        total_cards:
+          type: integer
+        columns:
+          type: array
+          items:
+            type: object
+            required: [column_id, name, card_count, wip_limit]
+            properties:
+              column_id:
+                $ref: '#/components/schemas/Id'
+              name:
+                type: string
+              card_count:
+                type: integer
+                description: Current WIP of the column.
+              wip_limit:
+                type: [integer, 'null']
+        cycle_time:
+          type: object
+          required: [average_seconds, cards]
+          properties:
+            average_seconds:
+              type: [number, 'null']
+              description: Average over finished cards. `null` if none has finished.
+            cards:
+              type: array
+              items:
+                type: object
+                required: [card_id, seconds]
+                properties:
+                  card_id:
+                    $ref: '#/components/schemas/Id'
+                  seconds:
+                    type: integer
